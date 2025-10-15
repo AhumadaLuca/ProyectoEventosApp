@@ -1,0 +1,154 @@
+/* --- Sidebar --- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  background-color: #212529;
+  color: white;
+  padding-top: 1rem;
+  z-index: 1000;
+}
+
+.sidebar a {
+  color: #adb5bd;
+  text-decoration: none;
+  display: block;
+  padding: 10px 20px;
+  transition: all 0.2s;
+}
+
+.sidebar a:hover {
+  background-color: #343a40;
+  color: #fff;
+}
+
+.sidebar h5 {
+  color: #fff;
+  padding-left: 20px;
+  margin-bottom: 1rem;
+}
+
+/* --- Contenido principal (mapa) --- */
+#map {
+  position: absolute;
+  top: 60px; /* altura del navbar */
+  left: 250px; /* ancho del sidebar */
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  /* 🔹 Sidebar se transforma en barra inferior fija */
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #212529;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+    z-index: 1001;
+    padding: 0;
+  }
+
+  .sidebar h5 {
+    display: none; /* Ocultamos el título */
+  }
+
+  .sidebar a {
+    color: #adb5bd;
+    text-decoration: none;
+    text-align: center;
+    padding: 5px;
+    font-size: 0.9rem;
+  }
+
+  .sidebar a:hover {
+    background-color: transparent;
+    color: #fff;
+  }
+
+  /* 🔹 Header (barra superior con buscador) */
+  header nav {
+    top: 0;
+    left: 0;
+    width: 100%;
+    position: fixed;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  #barra-busqueda {
+    width: 100%;
+    padding: 10px;
+    justify-content: center;
+    background-color: #ffffffee;
+  }
+
+  #pac-input {
+    width: 90%;
+    max-width: none;
+  }
+
+  /* 🔹 Ajuste del mapa (queda entre ambas barras) */
+  #map {
+    position: absolute;
+    top: 60px;         /* debajo del buscador */
+    bottom: 60px;      /* arriba de la barra inferior */
+    left: 0;
+    right: 0;
+  }
+}
+
+/* --- Barra superior --- */
+header nav {
+  position: fixed;
+  top: 0;
+  left: 250px;
+  width: calc(100% - 250px);
+  background: #f8f9fa;
+  z-index: 999;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+#barra-busqueda {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+#pac-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+  header nav {
+    left: 0;
+    width: 100%;
+  }
+}
+
+#mapaUbicacion { 
+  height: 300px; /* o 100% del div contenedor */
+  width: 100%;
+  border-radius: 8px;
+}
+
+
