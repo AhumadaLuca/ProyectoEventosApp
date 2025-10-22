@@ -65,4 +65,123 @@ public class Evento {
     public void prePersist() {
         this.fechaCreacion = LocalDateTime.now();
     }
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getTitulo() {
+		return titulo;
+	}
+
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
+	}
+
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
+	}
+
+	public LocalDateTime getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(LocalDateTime fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public LocalDateTime getFechaFin() {
+		return fechaFin;
+	}
+
+	public void setFechaFin(LocalDateTime fechaFin) {
+		this.fechaFin = fechaFin;
+	}
+
+	public String getUbicacion() {
+		return ubicacion;
+	}
+
+	public void setUbicacion(String ubicacion) {
+		this.ubicacion = ubicacion;
+	}
+
+	public Double getLatitud() {
+		return latitud;
+	}
+
+	public void setLatitud(Double latitud) {
+		this.latitud = latitud;
+	}
+
+	public Double getLongitud() {
+		return longitud;
+	}
+
+	public void setLongitud(Double longitud) {
+		this.longitud = longitud;
+	}
+
+	public Double getPrecio() {
+		return precio;
+	}
+
+	public void setPrecio(Double precio) {
+		this.precio = precio;
+	}
+
+	public String getUrlVentaExterna() {
+		return urlVentaExterna;
+	}
+
+	public void setUrlVentaExterna(String urlVentaExterna) {
+		this.urlVentaExterna = urlVentaExterna;
+	}
+
+	public Boolean getRequiereVerificarEdad() {
+		return requiereVerificarEdad;
+	}
+
+	public void setRequiereVerificarEdad(Boolean requiereVerificarEdad) {
+		this.requiereVerificarEdad = requiereVerificarEdad;
+	}
+
+	public String getImagenUrl() {
+		return imagenUrl;
+	}
+
+	public void setImagenUrl(String imagenUrl) {
+		this.imagenUrl = imagenUrl;
+	}
+
+	public Categoria getCategoria() {
+		return categoria;
+	}
+
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
+	}
+
+	public Usuario getOrganizador() {
+		return organizador;
+	}
+
+	public void setOrganizador(Usuario organizador) {
+		this.organizador = organizador;
+	}
+
+	public LocalDateTime getFechaCreacion() {
+		return fechaCreacion;
+	}
+    
+    
+    
 }
