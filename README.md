@@ -31,37 +31,13 @@ Una aplicación web que muestra **eventos en un mapa interactivo**, permitiendo 
 
 ---
 
-## 🧩 Estructura del proyecto
+## 📘 Registro de versiones
 
-ProyectoEventosApp/
-├── backend/
-│ ├── src/main/java/com/eventosapp/
-│ │ ├── controller/
-│ │ ├── model/
-│ │ ├── repository/
-│ │ └── service/
-│ └── resources/application.properties
-│
-├── frontend/
-│ ├── index.html
-│ ├── js/
-│ │ ├── eventos.js
-│ │ ├── mapa.js
-│ │ ├── ubicacion.js
-│ │ ├── utils.js
-│ │ └── formularioEvento.js
-│ └── css/
-│ └── estilo.css
-│
-└── README.md
-
-📘 Registro de versiones
-
-🟢 Eventos_App v0.2.0
+🟢 **Eventos_App v0.2.0**
 
 Se agregó la funcionalidad de CREATE y READ de eventos para poder visualizar los eventos en el mapa y ver algunos de sus datos.
 Además, se realizó una reorganización interna de los archivos JS, separándolos en módulos independientes para un código más limpio y mantenible.
 
-🟢 Eventos_App v0.1.0
+🟢 **Eventos_App v0.1.0**
 
 Comienzo del prototipo del proyecto con configuraciones básicas, algunos ajustes y agregados en el Backend y un Frontend mostrando lo "esperado" para la versión final.
