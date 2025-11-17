@@ -45,12 +45,12 @@ function colocarMarcador(lat, lng) {
 }
 
 function actualizarCoordenadas(lat, lng) {
-  document.getElementById('latitud').value = lat;
-  document.getElementById('longitud').value = lng;
+  document.getElementById('eventoLatitud').value = lat;
+  document.getElementById('eventoLongitud').value = lng;
 }
 
 function buscarDireccion() {
-  const direccion = document.getElementById("inputDireccion").value;
+  const direccion = document.getElementById("eventoDireccion").value;
   if (!direccion) return;
 
   fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(direccion)}&key=518f60686f5d43a6bc01e33e4eabb975`)

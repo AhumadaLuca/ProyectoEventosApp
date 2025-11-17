@@ -4,11 +4,15 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "eventos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Evento {
 
     @Id
@@ -46,20 +50,24 @@ public class Evento {
     @Column(name = "requiere_verificar_edad", nullable = false)
     private Boolean requiereVerificarEdad;
 
-    @Column(name = "imagen_url", nullable = true)
+    @Column(name = "imagen_url", nullable = false)
     private String imagenUrl;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
+    
+    @Column(name = "validado", nullable = false)
+    private Boolean validado = false;
 
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organizador_id")
-    private Usuario organizador;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "organizador_id", nullable = false)
+    @JsonBackReference
+    private Organizador organizador;
 
     @PrePersist
     public void prePersist() {
@@ -170,17 +178,27 @@ public class Evento {
 		this.categoria = categoria;
 	}
 
-	public Usuario getOrganizador() {
+	public Organizador getOrganizador() {
 		return organizador;
 	}
 
-	public void setOrganizador(Usuario organizador) {
+	public void setOrganizador(Organizador organizador) {
 		this.organizador = organizador;
 	}
 
 	public LocalDateTime getFechaCreacion() {
 		return fechaCreacion;
 	}
+
+	public Boolean getValidado() {
+		return validado;
+	}
+
+	public void setValidado(Boolean validado) {
+		this.validado = validado;
+	}
+	
+	
     
     
     
