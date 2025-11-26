@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,9 @@ public class JwtConfig {
 	
 	@Value("${jwt.secret}")
     private String SECRET;
+	
+	@Autowired
+	private IssuerProvider issuerProvider;
 
     public String generarToken(String email, String rol) {
 
@@ -28,6 +32,7 @@ public class JwtConfig {
 
         return Jwts.builder()
                 .setSubject(email)
+                .setIssuer(issuerProvider.getIssuer())
                 .claim("roles", List.of(rolConPrefijo))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 día
@@ -40,6 +45,7 @@ public class JwtConfig {
 
         return Jwts.parserBuilder()
                 .setSigningKey(key)
+                .requireIssuer(issuerProvider.getIssuer())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

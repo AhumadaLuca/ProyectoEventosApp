@@ -1,116 +1,219 @@
 
+import { cargarEventos } from './eventos.js';
+import { mostrarToast } from './toastsGenerico.js';
+import { mostrarModalConfirmacion } from "./confirmarGenerico.js";
+import { abrirModalDetalle } from "./modalDetallesGenerico.js";
+
 export async function initAdminPanel() {
 	const tbody = document.getElementById("eventosAdminBody");
 	if (!tbody) return console.error("No se encontró #eventosAdminBody en el DOM");
 
+	const _escape = (str) => {
+		if (typeof escapeHtml === "function") return escapeHtml(str);
+		if (str === null || str === undefined) return "";
+		return String(str)
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;")
+			.replaceAll("'", "&#039;");
+	};
+
 	tbody.innerHTML = `<tr><td colspan="8" class="text-center">Cargando...</td></tr>`;
 
 	try {
-		const resp = await fetch("http://localhost:8080/api/admin/eventos", {
+		const resp = await fetch("http://localhost:8080/api/admin/organizadoresYeventos", {
 			headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
 		});
 
 		if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-		const eventos = await resp.json(); // array de eventos con datos de organizador
-		if (!Array.isArray(eventos) || eventos.length === 0) {
-			tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay eventos.</td></tr>`;
+		const organizadores = await resp.json();
+
+		if (!Array.isArray(organizadores) || organizadores.length === 0) {
+			tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay organizadores.</td></tr>`;
 			return;
 		}
 
 		tbody.innerHTML = "";
-		eventos.forEach(ev => {
-			console.log(ev);
-			const organizadorNombre = ev.nombreOrganizador || (ev.organizador ? `${ev.organizador.nombre} ${ev.organizador.apellido}` : "—");
-			const organizadorEmail = ev.organizador?.email || ev.emailOrganizador || "—";
 
-			const fi = ev.fechaInicio ? ev.fechaInicio.substring(0, 16).replace("T", " ") : "—";
-			const ff = ev.fechaFin ? ev.fechaFin.substring(0, 16).replace("T", " ") : "—";
+		organizadores.forEach(org => {
+			const orgId = org.organizadorId;
+			const eventos = org.eventos || [];
 
-			const tr = document.createElement("tr");
-			tr.innerHTML = `
-        <td>${ev.id}</td>
-        <td>
-          <strong>${escapeHtml(ev.titulo || "—")}</strong>
-          <div class="text-muted small">${escapeHtml(ev.descripcion ? ev.descripcion.slice(0, 120) : "")}</div>
-        </td>
-        <td>${escapeHtml(ev.categoria || "—")}</td>
-        <td>${fi}<br><small class="text-muted">${ff}</small></td>
-        <td>
-          <div>${escapeHtml(organizadorNombre)}</div>
-          <div class="text-muted small">${escapeHtml(organizadorEmail)}</div>
-          ${ev.organizador?.verificado || ev.verificadoOrganizador ? '<span class="badge bg-success">Verificado</span>' : '<span class="badge bg-secondary">No verificado</span>'}
-        </td>
-        <td>${ev.validado ? '<span class="badge bg-success">Sí</span>' : '<span class="badge bg-warning text-dark">No</span>'}</td>
-        <td>
-          <button class="btn btn-sm btn-primary btn-validar-evento" data-id="${ev.id}">${ev.validado ? 'Invalidar' : 'Validar'}</button>
-          <button class="btn btn-sm btn-warning btn-editar-evento" data-bs-toggle="modal" data-bs-target="#nuevoEventoModal" data-id="${ev.id}">Editar</button>
-          <button class="btn btn-sm btn-danger btn-eliminar-evento" data-id="${ev.id}">Eliminar</button>
-        </td>
-        <td>
-        ${!ev.verificadoOrganizador
-					? `<button class="btn btn-sm btn-success btn-ver-organizador" data-organizador-id="${ev.organizadorId}">Verificar</button>`
-					: `<button class="btn btn-sm btn-warning btn-ver-organizador" data-organizador-id="${ev.organizadorId}">Revocar Verificar</button>`
-				}
-          
-          <button class="btn btn-sm btn-danger btn-eliminar-organizador" data-organizador-id="${ev.organizadorId}">Eliminar</button>
-        </td>
-      `;
-			tbody.appendChild(tr);
+			const collapseId = `eventos-org-${orgId}`;
+
+			// Fila principal del organizador
+			const trOrg = document.createElement("tr");
+			trOrg.classList.add("table-primary");
+			trOrg.innerHTML = `
+                <td colspan="8">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${_escape(org.nombreOrganizador)}</strong>
+                            <br>
+                            <span class="text-muted">${_escape(org.emailOrganizador)}</span>
+                            <br>
+                            ${org.verificadoOrganizador
+					? '<span class="badge bg-success">Verificado</span>'
+					: '<span class="badge bg-secondary">No verificado</span>'}
+                        </div>
+
+                        <div>
+                            <button class="btn btn-sm btn-warning btn-ver-organizador"
+                                data-organizador-id="${orgId}">
+                                ${org.verificadoOrganizador ? 'Revocar Verificar' : 'Verificar'}
+                            </button>
+
+                            <button class="btn btn-sm btn-danger btn-eliminar-organizador"
+                                data-organizador-id="${orgId}">
+                                Eliminar Organizador
+                            </button>
+
+                            <button class="btn btn-sm btn-info"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#${collapseId}">
+                                Ver eventos (${eventos.length})
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            `;
+			tbody.appendChild(trOrg);
+
+			// Fila que contiene la tabla colapsable
+			const trEventos = document.createElement("tr");
+			trEventos.innerHTML = `
+                <td colspan="8" class="p-0">
+                    <div id="${collapseId}" class="collapse">
+                        ${eventos.length === 0 ? `
+                            <div class="p-3 text-center text-muted">
+                                Este organizador no tiene eventos.
+                            </div>
+                        ` : `
+                            <table class="table table-sm table-bordered m-0">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>ID</th>
+                                        <th>Título</th>
+                                        <th>Categoría</th>
+                                        <th>Fechas</th>
+                                        <th>Validado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${eventos.map(ev => {
+				const fi = ev.fechaInicio ? ev.fechaInicio.replace("T", " ").slice(0, 16) : "—";
+				const ff = ev.fechaFin ? ev.fechaFin.replace("T", " ").slice(0, 16) : "—";
+
+				return `
+                                            <tr>
+                                                <td>${_escape(ev.id)}</td>
+                                                <td>
+                                                    <strong>${_escape(ev.titulo)}</strong><br>
+                                                    <small class="text-muted">${_escape(ev.descripcion)}</small>
+                                                </td>
+                                                <td>${_escape(ev.categoria || "—")}</td>
+                                                <td>${fi}<br><small class="text-muted">${ff}</small></td>
+
+                                                <td>
+                                                    ${ev.validado
+						? '<span class="badge bg-success">Sí</span>'
+						: '<span class="badge bg-warning text-dark">No</span>'}
+                                                </td>
+
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary btn-validar-evento"
+                                                        data-id="${ev.id}" data-estado="${ev.validado}">
+                                                        ${ev.validado ? 'Invalidar' : 'Validar'}
+                                                    </button>
+
+                                                    <button class="btn btn-sm btn-warning btn-editar-evento"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#nuevoEventoModal"
+                                                        data-id="${ev.id}">
+                                                        Editar
+                                                    </button>
+
+                                                    <button class="btn btn-sm btn-danger btn-eliminar-evento"
+                                                        data-id="${ev.id}">
+                                                        Eliminar
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `;
+			}).join("")}
+                                </tbody>
+                            </table>
+                        `}
+                    </div>
+                </td>
+            `;
+
+			tbody.appendChild(trEventos);
 		});
 
 	} catch (err) {
 		console.error("Error cargando admin panel:", err);
 		tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error cargando datos.</td></tr>`;
 	}
-
 }
 
 document.addEventListener("click", async (e) => {
-		// Confirmar validacion evento
-		if (e.target.matches(".btn-confirmar-validar-evento")) {
-			const id = e.target.dataset.id;
-			if (!id) return;
-			if (!confirm("¿Confirmás la validación de este evento?")) return;
-			try {
-				const response = await fetch(`http://localhost:8080/api/admin/eventos/validar/${id}`, {
-					method: "PUT",
-					headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-				});
-				if (response.ok) {
-					alert("☑️ Evento validado correctamente");
-					initAdminPanel();
-				} else {
-					alert("❌ No se pudo validar el evento");
+	// Actualizar Validacion evento
+	if (e.target.matches(".btn-confirmar-validar-evento")) {
+		const id = e.target.dataset.id;
+		const estado = e.target.dataset.estado === "true";
+		console.log(estado);
+		if (!id) return;
+
+		mostrarModalConfirmacion({
+			titulo: estado ? "Invalidar evento" : "Validar evento",
+			mensaje: estado ? `¿Deseas invalidar el evento #${id}?` : `¿Confirmas la validación del evento #${id}?`,
+			tipo: estado ? "warning" : "success",
+			textoBoton: estado ? "Invalidar" : "Validar",
+			onConfirm: async () => {
+				try {
+					const response = await fetch(`http://localhost:8080/api/admin/eventos/validar/${id}`, {
+						method: "PUT",
+						headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+					});
+
+					if (response.ok) {
+						mostrarToast(estado ? "☑️ Evento invalidado correctamente" : "☑️ Evento validado correctamente", "success");
+
+						// Actualizar mapa si existe
+						if (window.mapInstance) cargarEventos(window.mapInstance);
+
+						new bootstrap.Modal(document.getElementById("adminPanelModal")).show();
+					} else {
+						mostrarToast(estado ? "❌ No se pudo invalidar el evento" : "❌ No se pudo validar el evento", "danger");
+					}
+				} catch (err) {
+					mostrarToast(estado ? "Error al invalidar el evento: " + err : "Error al validar el evento: " + err, "danger");
 				}
-				initAdminPanel();
-			} catch (err) {
-				console.error("Error al validar el evento:", err);
-				alert("Error al validar el evento");
 			}
-		}
+		});
+	}
 
-		// Ver organizador para verificar
-		if (e.target.matches(".btn-ver-organizador")) {
+	// Ver organizador para verificar
+	if (e.target.matches(".btn-ver-organizador")) {
 
-			const orgId = e.target.dataset.organizadorId;
+		const orgId = e.target.dataset.organizadorId;
 
-			try {
-				const response = await fetch(`http://localhost:8080/api/admin/organizadores/ver/${orgId}`, {
-					method: "GET",
-					headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-				});
-				if (!response.ok) { throw new Error("No se pudo obtener el organizador"); }
+		try {
+			const response = await fetch(`http://localhost:8080/api/admin/organizadores/ver/${orgId}`, {
+				method: "GET",
+				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+			});
+			if (!response.ok) { throw new Error("No se pudo obtener el organizador"); }
 
-				const org = await response.json();
-				console.log(org);
-				console.log(org.id);
+			const org = await response.json();
 
-				const modal = document.getElementById("modalDetalleEvento");
-				const modalBody = document.getElementById("modalDetalleBody");
-				const modalFooter = modal.querySelector(".modal-footer");
-
-				modalBody.innerHTML = `
+			abrirModalDetalle({
+				titulo: "Detalles del organizador",
+				cuerpoHTML: `
       <div class="text-center">
         <img src="${org.fotoPerfil}" class="img-fluid rounded-circle mb-3" 
              style="width: 120px; height: 120px; object-fit: cover;">
@@ -124,76 +227,98 @@ document.addEventListener("click", async (e) => {
         <p><b>Registrado el:</b> ${org.fechaRegistro}</p>
         <p><b>Verificado:</b> ${org.verificado ? "✅ Sí" : "❌ No"}</p>
       </div>
-    `;
-
-
-				modalFooter.innerHTML = `
-      <button class="btn btn-secondary btn-volver-admin" data-bs-dismiss="modal">
+    `,
+				botonesHTML: `
+      <button class="btn btn-secondary btn-volver-admin">
         Volver al Panel
       </button>
-      ${!org.verificado
-						? `<button class="btn btn-success btn-verificar-organizador" data-bs-dismiss="modal" data-id="${org.id}">
-              Verificar Organizador
-            </button>`
-						: `<button class="btn btn-warning btn-verificar-organizador" data-bs-dismiss="modal" data-id="${org.id}">
-              Revocar Verificar Organizador
-            </button>`
-					}
-    `;
-				const panelModal = bootstrap.Modal.getInstance(document.getElementById("adminPanelModal"));
-				if (panelModal) {
-					panelModal.hide();
+			<button class="btn btn-warning btn-verificar-organizador" data-bs-dismiss="modal" data-id="${org.id}" data-estado="${org.verificado}">
+              ${org.verificado ? 'Revocar Verificar Organizador' : 'Verificar Organizador'}
+            </button>	
+    `
+			});
+			const panelModal = bootstrap.Modal.getInstance(document.getElementById("adminPanelModal"));
+			if (panelModal) {
+				panelModal.hide();
+			}
+
+			document.getElementById("modalDetalleGenerico").querySelector(".btn-volver-admin").addEventListener("click", () => {
+				const detalleModal = bootstrap.Modal.getInstance(document.getElementById("modalDetalleGenerico"));
+				if (detalleModal) detalleModal.hide();
+				const modalAdmin = new bootstrap.Modal(document.getElementById("adminPanelModal"));
+				modalAdmin.show();
+			});
+
+		} catch (err) {
+			console.error("Error:", err);
+			alert("Error");
+		}
+		return;
+	}
+
+	//Actualizar Verificacion organizador
+	if (e.target.matches(".btn-verificar-organizador")) {
+		const orgId = e.target.dataset.id;
+		const estado = e.target.dataset.estado === "true";
+		mostrarModalConfirmacion({
+			titulo: estado ? "Revocar verificación" : "Verificar organizador",
+			mensaje: estado ? `¿Confirmas la revocación de la verificación del organizador #${orgId}?` : `¿Confirmas la verificación del organizador #${orgId}?`,
+			tipo: estado ? "warning" : "success",
+			textoBoton: estado ? "Revocar" : "Verificar",
+			onConfirm: async () => {
+				try {
+					const response = await fetch(`http://localhost:8080/api/admin/organizadores/verificar/${orgId}`, {
+						method: "PUT",
+						headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+					});
+
+					if (!response.ok) throw new Error("No se pudo verificar el organizador");
+
+					mostrarToast(estado ? "☑️ Verificación removida correctamente" : "☑️ Organizador verificado correctamente", "success");
+					new bootstrap.Modal(document.getElementById("adminPanelModal")).show();
+				} catch {
+					mostrarToast(estado ? "Error removiendo verificación" : "Error verificando organizador", "danger");
 				}
-				new bootstrap.Modal(modal).show();
-
-				modalFooter.querySelector(".btn-volver-admin").addEventListener("click", () => {
-					// detalleModal.hide();
-					const modalAdmin = new bootstrap.Modal(document.getElementById("adminPanelModal"));
-					modalAdmin.show();
-				});
-
-			} catch (err) {
-				console.error("Error:", err);
-				alert("Error");
 			}
-			return;
-		}
+		});
+	}
 
-		if (e.target.matches(".btn-verificar-organizador")) {
+	// Eliminar organizador
+	if (e.target.matches(".btn-eliminar-organizador")) {
+		const orgId = e.target.dataset.organizadorId;
 
-			const orgId = e.target.dataset.id;
-			if (!confirm("¿Confirmás la validación de este organizador?")) return;
-			try {
-				const response = await fetch(`http://localhost:8080/api/admin/organizadores/verificar/${orgId}`, {
-					method: "PUT",
-					headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-				});
-				if (!response.ok) { throw new Error("No se pudo verificar el organizador"); }
+		mostrarModalConfirmacion({
+			titulo: "Eliminar organizador",
+			mensaje: "¿Eliminar organizador y todos sus eventos?",
+			tipo: "danger",
+			textoBoton: "Eliminar",
+			onConfirm: async () => {
+				try {
+					const resp = await fetch(`http://localhost:8080/api/admin/organizadores/eliminar/${orgId}`, {
+						method: "DELETE",
+						headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+					});
 
-				alert("☑️ Organizador verificado correctamente");
-				new bootstrap.Modal(document.getElementById("adminPanelModal")).show();
-			} catch {
+					if (!resp.ok) throw new Error();
 
+					mostrarToast("☑️ Organizador y sus eventos eliminados correctamente", "success");
+
+					const modalAbierto = document.querySelector(".modal.show");
+					if (modalAbierto) {
+						const instancia = bootstrap.Modal.getInstance(modalAbierto);
+						instancia?.hide();
+					}
+
+					new bootstrap.Modal(document.getElementById("adminPanelModal")).show();
+				} catch (err) {
+					console.error(err);
+					mostrarToast("Error eliminando organizador", "danger");
+				}
 			}
-		}
+		});
+	}
 
-		// Eliminar organizador
-		if (e.target.matches(".btn-eliminar-organizador")) {
-			const orgId = e.target.dataset.organizadorId;
-			if (!confirm("¿Eliminar organizador y todos sus eventos?")) return;
-			try {
-				const resp = await fetch(`http://localhost:8080/api/admin/organizadores/eliminar/${orgId}`, {
-					method: "DELETE", headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-				});
-				if (!resp.ok) throw new Error("Error al eliminar organizador");
-				
-				alert("☑️ Organizador y sus eventos eliminados correctamente");
-				new bootstrap.Modal(document.getElementById("adminPanelModal")).show();
-			} catch (err) { console.error(err); alert("Error eliminando organizador"); }
-			return;
-		}
-
-	});
+});
 
 // helpers seguros (escape)
 function escapeHtml(str) {

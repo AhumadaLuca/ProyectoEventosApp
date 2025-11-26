@@ -19,6 +19,7 @@ public class EventoResponseDTO {
     public String urlVentaExterna;
     public Boolean requiereVerificarEdad;
     public Long categoriaId;
+    public String categoriaNombre; 
     public String imagenUrl;
     public LocalDateTime fechaCreacion;
     public Boolean validado;

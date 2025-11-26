@@ -1,9 +1,20 @@
 
 import { mostrarToast } from './toastsGenerico.js';
-import {actualizarMenuUsuario} from './AuthUI.js';
+import { actualizarMenuUsuario } from './AuthUI.js';
+import { limpiarFormularioGenerico } from "./limpiezaFormGenerico.js";
 
 export function initFormularioOrganizador() {
 
+	document.getElementById("registroModal").addEventListener("hidden.bs.modal", () => {
+		limpiarFormularioGenerico("#formRegistro", {
+			idTitulo: "registroModalTitulo",
+			textoTitulo: "Registro - Organizador",
+			idBoton: "btnRegistroOrganizador",
+			textoBoton: "Registro",
+			previewImagenSelector: null   // No tenés preview, así que lo dejamos null
+		});
+	});
+	
 	const form = document.getElementById("formRegistro");
 	if (!form) return;
 
@@ -99,7 +110,10 @@ export function initFormularioOrganizador() {
 			}
 		}
 
-		if (hasError) return;
+		if (hasError) {
+			mostrarToast("Hay errores en los datos, por favor revísalos", "danger");
+			return;
+		}
 
 		// armar payload (no incluir telefono si no existe en HTML)
 		const organizador = {
@@ -126,7 +140,7 @@ export function initFormularioOrganizador() {
 
 			if (!res.ok) {
 				const msg = await res.text().catch(() => null);
-				mostrarToast("Error al registrar:" + msg, "danger");
+				mostrarToast("Error al registrar: " + msg, "danger");
 				return;
 			}
 
@@ -134,10 +148,25 @@ export function initFormularioOrganizador() {
 			form.reset();
 			bootstrap.Modal.getInstance(document.getElementById("registroModal")).hide();
 			mostrarToast("Registro exitoso 🎉", "success");
+			const modalLogin = new bootstrap.Modal(document.getElementById("loginModal"));
+			modalLogin.show();
+
 
 		} catch (error) {
-			console.error("Error en fetch registro:", error);
+			console.error("Error en fetch registro: ", error);
 			mostrarToast("Error de conexión con el servidor", "danger");
+		}
+	});
+
+	//Limpiamos login
+	document.getElementById("loginModal").addEventListener("show.bs.modal", () => {
+		const form = document.getElementById("formLogin");
+		if (form) form.reset();
+
+		const err = document.getElementById("loginError");
+		if (err) {
+			err.classList.add("d-none");
+			err.innerText = "";
 		}
 	});
 

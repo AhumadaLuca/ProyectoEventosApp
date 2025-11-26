@@ -73,6 +73,9 @@ Una aplicación web que permite visualizar eventos en un mapa interactivo, admin
 
 ## 📘 Registro de versiones (resumen)
 
+- **v0.4.0 — Mejoras masivas en UX, modales y estabilidad general:**  
+  Nuevo modal genérico de confirmación y de detalle, limpieza automática de formularios, corrección completa del mapa (marcadores y ubicaciones), mejora del flujo de registro/login, vista de perfil del organizador, manejo adecuado de imágenes, actualización del panel admin (organizador + eventos), fixes de JWT persistido, fechas, precio vacío, categorías, dirección, backdrops, botones dinámicos y más de 40 correcciones y mejoras en la experiencia de uso.
+
 - **v0.3.0 — Gran actualización:**  
   DTOs, CRUD completo de organizadores y eventos, JWT, panel admin, initializer, repositorios, modales y actualización profunda del frontend.
 

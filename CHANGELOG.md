@@ -3,6 +3,88 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 
 ---
 
+## [v0.4.0] - 2025-11-26
+
+### Añadido
+- Modal genérico de confirmación reutilizable:
+  - Reemplaza los distintos `confirm()` y modales individuales por uno configurable (título, mensaje, estilo y texto del botón).
+- Modal genérico para visualizar detalles:
+  - Sustituye a los modales individuales de “Detalle del Evento” y “Detalle del Organizador”, recibiendo título, cuerpo y botones dinámicos.
+- Ruta y módulo para ver perfil de organizador:
+  - Nueva ruta `GET /api/organizadores/ver/{id}` y módulo frontend dedicado para cargar y mostrar el perfil del organizador.
+- Función genérica `limpiarFormularioGenerico()`:
+  - Utilizada por formularios (eventos, organizadores) para resetear inputs, títulos, botones y errores.
+
+### Mejorado
+- UX de registro/login del organizador:
+  - Tras el registro no se inicia sesión automáticamente; se abre el modal de inicio de sesión para mantener flexibilidad para verificación por email futura.
+- Mostrar/ocultar contraseña en formularios:
+  - Botón con ícono de ojo para alternar visibilidad de campos `password`.
+- Botones dinámicos según estado (validado / verificado):
+  - Texto y estilo del botón cambian según el estado real del elemento para mayor claridad.
+- Notificaciones con toasts para acciones de verificación/validación:
+  - Reemplazo de `alert()` por toast para validar/invald. eventos y verificar/desverificar organizadores.
+- Unificación de toasts de creación/actualización:
+  - Mensajes de creación/actualización de eventos usan el sistema de toasts genérico ("Evento creado ✅", etc.) para coherencia visual.
+
+### Refactor
+- Uso del modal genérico en todos los flujos:
+  - Flujos de verificación, validación y eliminación actualizados para usar el nuevo modal centralizado, reduciendo duplicación.
+- Revisión de la lógica de recarga de eventos:
+  - Llamados de actualización (reload) ejecutados sólo cuando corresponde tras crear/actualizar/eliminar, evitando recargas innecesarias.
+
+### Corregido
+- Sesiones falsas por JWT persistido en `localStorage`:
+  - Backend genera un `issuer` único por ejecución; frontend valida el token al iniciar la app y limpia `localStorage` si el `issuer` es antiguo, evitando usuarios "logueados" tras despliegues/reinicios.
+- Carga de eventos del organizador con respuesta vacía:
+  - Se detecta correctamente la ausencia de contenido y se muestra "No hay eventos cargados" en lugar de fallar por `response.json()` sobre cuerpo vacío.
+- Visualización de imágenes en el mapa (errores 404):
+  - `uploads/` movida a la raíz del proyecto; Spring Boot la expone como recurso estático; la lógica crea la carpeta si no existe y permite sobrescritura segura, garantizando persistencia entre reinicios.
+- Carga de categoría al editar evento:
+  - El backend ahora devuelve `categoriaId` y `categoriaNombre`, permitiendo la selección automática en el formulario de edición.
+- Guardado con precio vacío:
+  - El formulario acepta correctamente cadenas vacías en `precio` (evento gratuito) tal como lo permite el backend.
+- Latitud/longitud faltantes al editar:
+  - Los campos ocultos de lat/lng se rellenan al cargar el evento para que la validación no falle cuando la ubicación se muestra en pantalla.
+- Texto del botón de guardado en modal de eventos:
+  - Se diferencia correctamente entre modo "Crear" y "Editar"; el botón ya no vuelve a "Crear Evento" tras errores de validación/guardado.
+- Desfase horario al guardar fechas:
+  - El formulario deja de enviar objetos `Date` (que convertían a UTC); ahora envía fechas como `string` y el backend las interpreta como `LocalDateTime`, eliminando desfases (+3 a +6 horas).
+- Actualización correcta del mapa (marcadores):
+  - Uso de un `LayerGroup` global para administrar marcadores; se limpian y redibujan correctamente tras crear, editar o eliminar eventos evitando duplicados o marcadores de eventos borrados.
+- Formulario no conserva datos al crear nuevo evento:
+  - Al abrir modal en modo creación el formulario se limpia completamente (inputs, archivos, previews, validaciones).
+- Formulario de login se limpia al abrir:
+  - Campos y mensajes de error se resetean cada vez que se abre el modal de inicio de sesión (evita datos residuales tras logout).
+- Eliminación de doble apertura de modal y backdrops persistentes:
+  - Se eliminó `data-bs-toggle` duplicado y ahora los modales se abren sólo desde JavaScript, evitando aperturas dobles y backdrops bloqueantes.
+- Vista previa de imagen previa al crear un nuevo evento:
+  - Se limpia el campo de archivo y se oculta la vista previa al reiniciar/abrir el modal en modo creación.
+- Modal no muestra título incorrecto al ver organizador:
+  - El título del modal ahora se actualiza dinámicamente según el contexto (evento u organizador).
+- Cierre automático de modales y retorno al Panel de Admin:
+  - Tras validar/invalidar o modificar eventos el modal se cierra y el Panel de Administración reaparece automáticamente.
+- Mensajes y textos invertidos corregidos:
+  - Corrección de textos que mostraban acciones opuestas (validar vs invalidar, verificar vs quitar verificación) según `data-estado`.
+- Mensaje al invalidar eventos corregido:
+  - Botones, modales y toasts reflejan correctamente la acción de invalidar.
+- Mensaje al quitar verificación corregido:
+  - Ahora muestra "Quitar verificación" cuando corresponde.
+- Error por campo de dirección indefinido en modal de evento:
+  - Validación previa para evitar errores cuando `direccion` es `null` o inexistente.
+- Formulario del evento se limpia al cerrar el modal:
+  - Se eliminan campos, errores visuales y valores previos al cerrar el modal.
+- Mapa limpiado al cerrar modal:
+  - Latitud, longitud, marcador y popup previos se eliminan al cerrar el modal para evitar restos visuales.
+- Actualización del mapa al eliminar evento:
+  - Tras eliminación exitosa se recarga la capa de eventos para quitar el marcador correspondiente.
+- Panel de Administración: ahora incluye organizadores con sus eventos:
+  - La API devuelve organizadores con la lista de sus eventos asociados; UI muestra la información agrupada por organizador.
+- Eliminar organizador ya no deja fondo negro ni bloquea la pantalla:
+  - Se asegura el cierre correcto de modales y la remoción de backdrops antes de reabrir el panel de administración.
+
+---
+
 ## [v0.3.0] - 2025-11-17
 
 ### Añadido

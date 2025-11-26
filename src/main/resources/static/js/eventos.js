@@ -1,10 +1,16 @@
 // eventos.js
 import { formatearFecha } from './utils.js';
+import { abrirModalDetalle } from "./modalDetallesGenerico.js";
 
 export async function cargarEventos(map) {
 	try {
 		const resp = await fetch("http://localhost:8080/api/eventos");
 		const eventos = await resp.json();
+
+		//Limpiar marcadores anteriores
+		if (window.eventMarkersLayer) {
+			window.eventMarkersLayer.clearLayers();
+		}
 
 		eventos.forEach(evento => {
 			// Crear un div real
@@ -53,7 +59,7 @@ export async function cargarEventos(map) {
 
 			// Agregar el popup al marker
 			L.marker([evento.latitud, evento.longitud])
-				.addTo(map)
+				.addTo(window.eventMarkersLayer)
 				.bindPopup(popupDiv);
 		});
 
@@ -67,14 +73,12 @@ export async function verDetalles(eventoId, modoAdmin = false) {
 		const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}`);
 		if (!res.ok) throw new Error("No se pudo obtener el evento");
 		const evento = await res.json();
-		
+
 		console.log(evento);
 
-		const modal = document.getElementById("modalDetalleEvento");
-		const modalBody = document.getElementById("modalDetalleBody");
-		const modalFooter = modal.querySelector(".modal-footer");
-
-		modalBody.innerHTML = `
+		abrirModalDetalle({
+			titulo: "Detalles del evento",
+			cuerpoHTML: `
       <h5>${evento.titulo}</h5>
       <p><b>Descripción:</b> ${evento.descripcion}</p>
       <p><b>Fecha:</b> ${formatearFecha(evento.fechaInicio)} - ${formatearFecha(evento.fechaFin)}</p>
@@ -85,26 +89,23 @@ export async function verDetalles(eventoId, modoAdmin = false) {
       <p><b>Validado:</b> ${evento.validado ? '☑️ Sí' : '❌ No'}</p>
       ${evento.imagenUrl ? `<img src="${evento.imagenUrl}" style="width:100%; border-radius:4px;">` : ''}
       ${modoAdmin
-				? `<div class="text-center mt-3">
-               ${evento.validado
-					? `<button class="btn btn-warning btn-confirmar-validar-evento" data-id="${evento.id}">Invalidar Evento</button>`
-					: `<button class="btn btn-success btn-confirmar-validar-evento" data-id="${evento.id}">Validar Evento</button>`
+					? `<div class="text-center mt-3">
+						<button 
+						class="btn ${evento.validado ? 'btn-warning' : 'btn-success'} btn-confirmar-validar-evento"
+						data-bs-dismiss="modal" 
+						data-id="${evento.id}" 
+						data-estado="${evento.validado}">${evento.validado ? 'Invalidar Evento' : 'Validar Evento'}
+						</button>
+			 		</div>`
+					: ""
 				}
-             </div>`
-				: ""
-			}
-    `;
+    `, botonesHTML:
+				`${modoAdmin
 
-		if (modoAdmin) {
-			modalFooter.innerHTML = `
-        <button class="btn btn-secondary btn-volver-admin" data-bs-dismiss="modal">Volver al Panel</button>
-      `;
-		} else {
-			modalFooter.innerHTML = `
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-      `;
-		}
-
+					? `<button class="btn btn-secondary btn-volver-admin" data-bs-dismiss="modal">Volver al Panel</button>`
+					: `<button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>`
+				}`
+		});
 
 		if (modoAdmin) {
 			modalFooter.querySelector(".btn-volver-admin").addEventListener("click", () => {
@@ -114,7 +115,7 @@ export async function verDetalles(eventoId, modoAdmin = false) {
 			});
 		}
 		// 🔥 Mostrar el modal
-		new bootstrap.Modal(document.getElementById("modalDetalleEvento")).show();
+		new bootstrap.Modal(document.getElementById("modalDetalleGenerico")).show();
 
 	} catch (err) {
 		console.error("Error cargando detalle del evento:", err);
@@ -139,12 +140,14 @@ export async function verEventosOrganizador() {
 			return;
 		}
 
-		const eventos = await response.json();
+		const text = await response.text();
 
-		if (!eventos || eventos.length === 0) {
+		if (!text) {
 			tabla.innerHTML = "<tr><td colspan='8' class='text-center'>No hay eventos cargados.</td></tr>";
 			return;
 		}
+
+		const eventos = JSON.parse(text);
 
 		// Limpio la tabla antes de llenar
 		tabla.innerHTML = "";

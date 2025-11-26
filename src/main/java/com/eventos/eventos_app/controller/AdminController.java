@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.eventos.eventos_app.dto.EventoAdminDTO;
+import com.eventos.eventos_app.dto.OrganizadorAdminDTO;
 import com.eventos.eventos_app.services.AdminServicio;
 
 @RestController
@@ -23,10 +23,10 @@ public class AdminController {
 	private AdminServicio adminServicio;
 	
 
-	@GetMapping("/eventos")
+	@GetMapping("/organizadoresYeventos")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<List<EventoAdminDTO>> obtenerEventosYOrganizador() {
-		List<EventoAdminDTO> lista = adminServicio.obtenerEventosConOrganizadores();
+	public ResponseEntity<List<OrganizadorAdminDTO>> obtenerEventosYOrganizador() {
+		List<OrganizadorAdminDTO> lista = adminServicio.obtenerOrganizadoresConEventos();
 		return ResponseEntity.ok(lista);
 	}
 

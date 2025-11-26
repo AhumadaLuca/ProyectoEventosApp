@@ -108,6 +108,7 @@ public class EventoServicio {
 	    // Relaciones
 	    if (e.getCategoria() != null) {
 	        dto.categoriaId = e.getCategoria().getId();
+	        dto.categoriaNombre = e.getCategoria().getNombre();
 	    }
 
 	    if (e.getOrganizador() != null) {
@@ -137,7 +138,7 @@ public class EventoServicio {
 
 	    if (imagen != null && !imagen.isEmpty()) {
 			String nombre = UUID.randomUUID() + "_" + imagen.getOriginalFilename();
-			Path ruta = Paths.get("src/main/resources/static/uploads/" + nombre);
+			Path ruta = Paths.get("uploads/" + nombre);
 			Files.copy(imagen.getInputStream(), ruta);
 			e.setImagenUrl("/uploads/" + nombre);
 		}

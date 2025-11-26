@@ -25,7 +25,7 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**","/uploads/**").permitAll()
-                .requestMatchers("/api/auth/**","/api/eventos","/api/eventos/{id}").permitAll() // registro / login libres / mostrar eventos
+                .requestMatchers("/api/auth/**","/api/eventos","/api/eventos/{id}","/issuer/**","/api/organizadores/**").permitAll() // registro / login libres / mostrar eventos
                 .requestMatchers("/api/eventos/**").hasAnyRole("ORGANIZADOR","ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

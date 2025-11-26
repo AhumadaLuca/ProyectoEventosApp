@@ -16,6 +16,9 @@ export function initMapa() {
 
   // Agregar control de zoom abajo a la derecha
   L.control.zoom({ position: 'bottomright' }).addTo(map);
+  
+  // 🆕 Crear un LayerGroup global para manejar los marcadores del mapa
+  window.eventMarkersLayer = L.layerGroup().addTo(map);
 
   console.log("🗺️ Mapa inicializado correctamente");
   return map;

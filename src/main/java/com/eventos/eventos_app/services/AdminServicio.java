@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eventos.eventos_app.dto.EventoAdminDTO;
+import com.eventos.eventos_app.dto.EventosAdminDTO;
+import com.eventos.eventos_app.dto.OrganizadorAdminDTO;
 import com.eventos.eventos_app.models.Evento;
 import com.eventos.eventos_app.models.Organizador;
 import com.eventos.eventos_app.repository.EventoRepository;
@@ -24,26 +25,32 @@ public class AdminServicio {
     @Autowired
     private OrganizadorRepository organizadorRepository;
 
-    public List<EventoAdminDTO> obtenerEventosConOrganizadores() {
-        List<Evento> eventos = eventoRepository.findAll();
+    public List<OrganizadorAdminDTO> obtenerOrganizadoresConEventos() {
+    	List<Organizador> organizadores = organizadorRepository.findAll();
+    	
+    	return organizadores.stream().map(org -> {
 
-        return eventos.stream().map(e -> {
-            Organizador org = e.getOrganizador();
-
-            return new EventoAdminDTO(
-                e.getId(),
-                e.getTitulo(),
-                e.getDescripcion(),
-                e.getCategoria() != null ? e.getCategoria().getNombre() : null,
-                e.getFechaInicio() != null ? e.getFechaInicio().toString() : null,
-                e.getFechaFin() != null ? e.getFechaFin().toString() : null,
-                e.getValidado(),
-                org != null ? org.getId() : null,
-                org != null ? org.getNombre() + " " + org.getApellido() : null,
-                org != null ? org.getEmail() : null,
-                org != null && Boolean.TRUE.equals(org.getVerificado())
-            );
-        }).collect(Collectors.toList());
+    	 List<EventosAdminDTO> eventosDTO = org.getEventos().stream().map(e ->
+         new EventosAdminDTO(
+             e.getId(),
+             e.getTitulo(),
+             e.getDescripcion(),
+             e.getCategoria() != null ? e.getCategoria().getNombre() : null,
+             e.getFechaInicio() != null ? e.getFechaInicio().toString() : null,
+             e.getFechaFin() != null ? e.getFechaFin().toString() : null,
+             e.getValidado()
+         )
+     ).toList();
+    	 
+    	 return new OrganizadorAdminDTO(
+                 org.getId(),
+                 org.getNombre() + " " + org.getApellido(),
+                 org.getEmail(),
+                 Boolean.TRUE.equals(org.getVerificado()),
+                 eventosDTO
+         );
+     }).toList();
+    	
     }
     
     public void validarEvento(Long idEvento) {

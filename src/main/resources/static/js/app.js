@@ -5,15 +5,45 @@ import { initFormularioEvento } from './formularioEvento.js';
 import { initFormularioOrganizador } from './formularioOrganizador.js';
 import { actualizarMenuUsuario } from './AuthUI.js';
 import { initAdminPanel } from './adminPanel.js';
+import { decodeJwt } from './issuerDecode.js';
+import { initPasswordToggles } from './passwordToggle.js';
+import { initVerOrganizador } from './organizador.js';
 
-export function iniciarApp() {
+export async function iniciarApp() {
+	
+	let issuerBackend = null;
+    try {
+        const res = await fetch("/issuer/validar");
+        issuerBackend = await res.text();
+    } catch (e) {
+        console.warn("No se pudo obtener el issuer del servidor");
+    }
+
+    if (issuerBackend) {
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            const payload = decodeJwt(token);
+            const issuerToken = payload?.iss;
+
+            // 2. Si el issuer guardado es diferente → token inválido → limpiar
+            if (issuerToken !== issuerBackend) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("rol");
+                localStorage.removeItem("nombre");
+            }
+        }
+    }
+	
 	const map = initMapa();
 	window.mapInstance = map;
 	cargarEventos(map); // Solo los públicos, esto sí se puede cargar al inicio
+	initPasswordToggles();
 	initFormularioEvento();
 	actualizarMenuUsuario();
 	initUbicacionModal();
 	initFormularioOrganizador();
+	initVerOrganizador();
 
 	// Delegar acciones por botones o tabs
 	const modalMisEventos = document.getElementById("modalAdministrarEventosOrganizador");

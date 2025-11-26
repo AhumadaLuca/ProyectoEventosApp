@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="./css/estilo.css" />
 	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
 <body>
@@ -51,8 +52,12 @@
 						</div>
 						<div class="mb-3">
 							<label for="loginPassword" class="form-label">Contraseña</label>
-							<input type="password" id="loginPassword" name="password" class="form-control" required
-								minlength="6">
+							<div class="input-group">
+								<input type="password" id="loginPassword" name="password" class="form-control" required
+									minlength="6">
+								<button class="btn btn-light border" type="button" data-toggle-password><i
+										class="bi bi-eye-slash" data-icon></i></button>
+							</div>
 						</div>
 						<div id="loginError" class="alert alert-danger d-none" role="alert"></div>
 					</div>
@@ -71,7 +76,7 @@
 			<div class="modal-content">
 				<form id="formRegistro" class="p-0">
 					<div class="modal-header bg-success text-white">
-						<h5 class="modal-title">Registro - Organizador</h5>
+						<h5 class="modal-title" id="registroModalTitulo">Registro - Organizador</h5>
 						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 					</div>
 
@@ -103,15 +108,25 @@
 
 							<div class="col-md-6">
 								<label class="form-label">Contraseña</label>
-								<input type="password" name="password" id="regPassword" class="form-control" required
-									minlength="6">
+								<div class="input-group">
+									<input type="password" name="password" id="regPassword" class="form-control"
+										required minlength="6" data-password>
+									<button class="btn btn-light border" type="button" data-toggle-password><i
+											class="bi bi-eye-slash" data-icon></i></button>
+								</div>
+
 								<small class="text-danger d-none" id="errorPassword"></small>
 
 							</div>
 
 							<div class="col-md-6">
 								<label class="form-label">Repetir contraseña</label>
-								<input type="password" id="regPassword2" class="form-control" required minlength="6">
+								<div class="input-group">
+									<input type="password" id="regPassword2" class="form-control" required minlength="6"
+										data-password>
+									<button class="btn btn-light border" type="button" data-toggle-password><i
+											class="bi bi-eye-slash" data-icon></i></button>
+								</div>
 								<small class="text-danger d-none" id="errorPassword2"></small>
 
 							</div>
@@ -146,7 +161,7 @@
 
 							</div>
 
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<label class="form-label">Foto de Perfil</label>
 								<input type="file" name="imagen" id="regImagenPerfil" class="form-control"
 									accept="image/*" />
@@ -159,7 +174,7 @@
 					<div class="modal-footer">
 						<button type="button" class="btn btn-outline-secondary"
 							data-bs-dismiss="modal">Cancelar</button>
-						<button type="submit" class="btn btn-success">Registro</button>
+						<button type="submit" class="btn btn-success" id="btnRegistroOrganizador">Registro</button>
 					</div>
 				</form>
 			</div>
@@ -186,7 +201,7 @@
 								<label class="form-label">Título</label>
 								<input type="text" name="titulo" class="form-control" id="eventoTitulo" required
 									maxlength="50" />
-								<small class="text-danger d-none" id="errorTitulo"></small>
+								<small class="invalid-feedback d-none" id="errorTitulo"></small>
 							</div>
 
 							<div class="col-md-6">
@@ -197,28 +212,28 @@
 									<option value="2">Deporte</option>
 									<option value="3">Teatro</option>
 								</select>
-								<small class="text-danger d-none" id="errorCategoria"></small>
+								<small class="invalid-feedback d-none" id="errorCategoria"></small>
 							</div>
 
 							<div class="col-12">
 								<label class="form-label">Descripción</label>
 								<textarea name="descripcion" id="eventoDescripcion" class="form-control" rows="3"
 									maxlength="300" required></textarea>
-								<small class="text-danger d-none" id="errorDescripcion"></small>
+								<small class="invalid-feedback d-none" id="errorDescripcion"></small>
 							</div>
 
 							<div class="col-md-6">
 								<label class="form-label">Fecha de inicio</label>
 								<input type="datetime-local" name="fechaInicio" id="eventoFechaInicio"
 									class="form-control" required />
-								<small class="text-danger d-none" id="errorFechaInicio"></small>
+								<small class="invalid-feedback d-none" id="errorFechaInicio"></small>
 							</div>
 
 							<div class="col-md-6">
 								<label class="form-label">Fecha de fin</label>
 								<input type="datetime-local" name="fechaFin" id="eventoFechaFin" class="form-control"
 									required />
-								<small class="text-danger d-none" id="errorFechaFin"></small>
+								<small class="invalid-feedback d-none" id="errorFechaFin"></small>
 							</div>
 
 							<div class="col-12">
@@ -230,7 +245,7 @@
 										Buscar
 									</button>
 								</div>
-								<small class="text-danger d-none" id="errorDireccion"></small>
+								<small class="invalid-feedback d-none" id="errorDireccion"></small>
 							</div>
 
 							<!-- Mapa para seleccionar ubicación -->
@@ -239,27 +254,30 @@
 							<!-- Campos ocultos para guardar coordenadas -->
 							<input type="hidden" name="latitud" id="eventoLatitud" />
 							<input type="hidden" name="longitud" id="eventoLongitud" />
+							<small class="invalid-feedback d-none" id="errorLatitud"></small>
+							<small class="invalid-feedback d-none" id="errorLongitud"></small>
 
 							<div class="col-md-4">
 								<label class="form-label">Precio</label>
 								<input type="number" step="0.01" name="precio" id="eventoPrecio" class="form-control"
 									placeholder="0 si es gratis" />
-								<small class="text-danger d-none" id="errorPrecio"></small>
+								<small class="invalid-feedback d-none" id="errorPrecio"></small>
 							</div>
 
 							<div class="col-md-6">
 								<label class="form-label">Imagen del evento</label>
 								<input type="file" name="imagen" id="eventoImagen" class="form-control"
 									accept="image/*" />
-								<img id="previewImagenEvento" src="" alt="Vista previa" class="mt-2 img-fluid rounded" style="display:none; max-width: 200px;">
-								<small class="text-danger d-none" id="errorImagen"></small>
+								<img id="previewImagenEvento" src="" alt="Vista previa" class="mt-2 img-fluid rounded"
+									style="display:none; max-width: 200px;">
+								<small class="invalid-feedback d-none" id="errorImagen"></small>
 							</div>
 
 							<div class="col-md-6">
 								<label class="form-label">Enlace externo (opcional)</label>
 								<input type="url" name="urlVentaExterna" id="eventoUrlVentaExterna" class="form-control"
 									placeholder="https://www.tuentrada.com/evento123" />
-								<small class="text-danger d-none" id="errorUrlVentaExterna"></small>
+								<small class="invalid-feedback d-none" id="errorUrlVentaExterna"></small>
 							</div>
 							<div class="col-md-6 d-flex align-items-center">
 								<div class="form-check mt-3">
@@ -277,7 +295,7 @@
 							Cancelar
 						</button>
 						<button type="submit" class="btn btn-success" id="btnGuardarEvento">
-							Guardar Evento
+							Crear Evento
 						</button>
 					</div>
 				</form>
@@ -329,11 +347,11 @@
 	</div>
 
 	<!-- MODAL MOSTRAR DETALLES COMPLETO DE EVENTOS / ORGANIZADOR (SOLO ADMINISTRADOR) -->
-	<div class="modal fade" id="modalDetalleEvento" tabindex="-1" aria-hidden="true">
+	<div class="modal fade" id="modalDetalleGenerico" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-lg modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header bg-info text-white">
-					<h5 class="modal-title">Detalle del Evento</h5>
+					<h5 class="modal-title"></h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 				</div>
 				<div class="modal-body" id="modalDetalleBody">
@@ -345,6 +363,9 @@
 			</div>
 		</div>
 	</div>
+	
+	
+	
 	<!-- MODAL ADMINISTRAR EVENTOS DE UN ORGANIZADOR -->
 	<div class="modal fade" id="modalAdministrarEventosOrganizador" tabindex="-1"
 		aria-labelledby="detalleEventoModalLabel" aria-hidden="true">
@@ -387,67 +408,60 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- MODAL PANEL DE ADMINISTRADOR -->
-<div class="modal fade" id="adminPanelModal" tabindex="-1" aria-labelledby="adminPanelLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title" id="adminPanelLabel">Panel de Administración</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
+	<div class="modal fade" id="adminPanelModal" tabindex="-1" aria-labelledby="adminPanelLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header bg-dark text-white">
+					<h5 class="modal-title" id="adminPanelLabel">Panel de Administración</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
 
-      <div class="modal-body">
-        <div class="table-responsive">
-          <table class="table table-hover table-striped align-middle">
-            <thead>
-              <tr>
-                <th>ID Evento</th>
-                <th>Título</th>
-                <th>Categoría</th>
-                <th>Fechas</th>
-                <th>Organizador</th>
-                <th>Validación evento</th>
-                <th>Acciones Evento</th>
-                <th>Acciones Organizador</th>
-              </tr>
-            </thead>
-            <tbody id="eventosAdminBody">
-              <!-- filas generadas por JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table table-hover table-striped align-middle">
+							<thead>
+							</thead>
+							<tbody id="eventosAdminBody">
+								<!-- filas generadas por JS -->
+							</tbody>
+						</table>
+					</div>
+				</div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<!-- TOASTS GENERICO PARA REGISTRO/LOGIN/EVENTOS -->
 	<div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
 		<div id="toastContainer"></div>
 	</div>
-	<!-- MODAL PARA CONFIRMAR ELIMINACION -->
-<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="confirmarEliminarLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <p id="mensajeEliminarEvento">¿Seguro que deseas eliminar este evento?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
-      </div>
-    </div>
-  </div>
-</div>
+	<!-- MODAL GENÉRICO DE CONFIRMACIÓN -->
+	<div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+
+				<div class="modal-header" id="modalConfirmacionHeader">
+					<h5 class="modal-title" id="modalConfirmacionLabel">Título</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+
+				<div class="modal-body" id="modalConfirmacionMensaje">Mensaje</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+					<button type="button" class="btn btn-primary" id="modalConfirmacionBtn">Aceptar</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
 
 	<!-- JS -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
