@@ -3,6 +3,27 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 
 ---
 
+## [v0.4.1] - 2025-12-09
+
+### Añadido
+- Filtrado de eventos en el mapa:
+  - Implementación de filtros por **categorías**, **precio máximo** y **rango de fechas** desde el modal de filtros.
+  - Caché local en memoria (`eventosCache`) para evitar llamadas innecesarias al backend y permitir una experiencia de filtrado instantánea.
+  - Botón "Quitar filtros" en el sidebar para restaurar rápidamente la vista completa del mapa.
+
+### Mejorado
+- Lógica de carga y dibujo de eventos separada en `cargarEventos()` / `dibujarEventosEnMapa()` / `filtrarEventos()` para facilitar mantenimiento y testing.
+
+### Corregido
+- Fondo negro persistente al cerrar el modal de detalle:
+  - Se eliminó la apertura doble del modal (se quitó la llamada redundante que mostraba el modal por segunda vez), evitando backdrops duplicados que bloqueaban la interacción.
+- Visualización de categoría en popups y detalle:
+  - Se añadió mapeo de iconos por categoría (emoji) y se muestra el icono junto al nombre en el popup del mapa y en la vista "Ver más".
+- Validación de imagen al crear eventos:
+  - Se añadió el flujo `else` cuando no se sube imagen, de modo que se muestre el mensaje de validación correcto y se evite que aparezca un error inesperado.
+
+---
+
 ## [v0.4.0] - 2025-11-26
 
 ### Añadido

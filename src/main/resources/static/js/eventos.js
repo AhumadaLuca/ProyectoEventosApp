@@ -2,17 +2,44 @@
 import { formatearFecha } from './utils.js';
 import { abrirModalDetalle } from "./modalDetallesGenerico.js";
 
+// Cache en memoria (se carga una sola vez por sesión)
+export let eventosCache = [];
+
 export async function cargarEventos(map) {
 	try {
-		const resp = await fetch("http://localhost:8080/api/eventos");
-		const eventos = await resp.json();
+        // Si ya tenemos caché, usarlo directamente
+        if (eventosCache.length > 0) {
+            dibujarEventosEnMapa(eventosCache);
+            console.log(eventosCache);
+            return eventosCache;
+        }
 
-		//Limpiar marcadores anteriores
-		if (window.eventMarkersLayer) {
-			window.eventMarkersLayer.clearLayers();
-		}
+        // Si no hay caché → pedir al backend
+        const resp = await fetch("http://localhost:8080/api/eventos");
+        const eventos = await resp.json();
 
-		eventos.forEach(evento => {
+        // Guardar en caché
+        eventosCache = eventos;
+
+        // Dibujar en el mapa
+        dibujarEventosEnMapa(eventos);
+
+        return eventos;
+
+    } catch (err) {
+        console.error("❌ Error cargando eventos:", err);
+    }
+}
+
+export function dibujarEventosEnMapa(eventos) {
+    
+    if (window.eventMarkersLayer) {
+        window.eventMarkersLayer.clearLayers();
+    }
+    
+    console.log(eventos);
+
+    eventos.forEach(evento => {
 			// Crear un div real
 			const popupDiv = document.createElement('div');
 			popupDiv.style.width = '230px';
@@ -38,8 +65,11 @@ export async function cargarEventos(map) {
               ${evento.precio > 0 ? `$${evento.precio}` : 'Gratis'}
             </span>
           </div>
-          <p style="margin:0; font-size:12px; color:#666;">
+          <p style="margin:5px; font-size:12px;">
             <b>📅</b> ${formatearFecha(evento.fechaInicio)}
+          </p>
+          <p style="margin:5px;" font-size:12px;>
+          <b>${obtenerIconoCategoria(evento.categoria.nombre)}</b> ${evento.categoria.nombre}
           </p>
           <p style="margin:0; margin-top:5px;"><b>Validado:</b> ${evento.validado ? '☑️' : '❌'}</p>
         </div>
@@ -62,10 +92,50 @@ export async function cargarEventos(map) {
 				.addTo(window.eventMarkersLayer)
 				.bindPopup(popupDiv);
 		});
+}
 
-	} catch (err) {
-		console.error("❌ Error cargando eventos:", err);
-	}
+const iconosPorCategoria = {
+    "Música": "🎵",
+    "Deporte": "🏅",
+    "Teatro": "🎭",
+    // Default si la categoría no está definida
+    "default": "❓"
+};
+
+function obtenerIconoCategoria(nombreCat) {
+    return iconosPorCategoria[nombreCat] || iconosPorCategoria.default;
+}
+
+export function filtrarEventos({ categorias, precioMax, fechaDesde, fechaHasta }) {
+    
+    let filtrados = [...eventosCache];
+
+	console.log("Sin filtrar: ", filtrados);
+
+    // Categorías
+    if (Array.isArray(categorias) && categorias.length > 0) {
+        filtrados = filtrados.filter(e => categorias.includes(e.categoria.nombre));
+    }
+
+    // Precio
+    if (precioMax && precioMax > 0) {
+        filtrados = filtrados.filter(e => e.precio <= precioMax);
+    }
+
+    // Fecha desde
+    if (fechaDesde) {
+        filtrados = filtrados.filter(e => new Date(e.fechaInicio) >= new Date(fechaDesde));
+    }
+
+    // Fecha hasta
+    if (fechaHasta) {
+        filtrados = filtrados.filter(e => new Date(e.fechaInicio) <= new Date(fechaHasta));
+    }
+
+    // Dibujar en el mapa
+    dibujarEventosEnMapa(filtrados);
+
+    return filtrados;
 }
 
 export async function verDetalles(eventoId, modoAdmin = false) {
@@ -84,6 +154,7 @@ export async function verDetalles(eventoId, modoAdmin = false) {
       <p><b>Fecha:</b> ${formatearFecha(evento.fechaInicio)} - ${formatearFecha(evento.fechaFin)}</p>
       <p><b>Ubicación:</b> ${evento.ubicacion || 'No especificada'}</p>
       <p><b>Precio:</b> ${evento.precio > 0 ? `$${evento.precio}` : 'Gratis'}</p><p><b>Verificación de edad:</b> ${evento.requiereVerificarEdad ? 'Sí' : 'No'}</p>
+      <p><b>Categoria:</b> ${evento.categoriaNombre}</p>
       <p><b>Link externo:</b>${evento.urlVentaExterna || 'No disponible'}</p>
       <p><b>Organizador:</b> ${evento.nombreOrganizador || 'Desconocido'}</p>
       <p><b>Validado:</b> ${evento.validado ? '☑️ Sí' : '❌ No'}</p>
@@ -114,8 +185,6 @@ export async function verDetalles(eventoId, modoAdmin = false) {
 				modalAdmin.show();
 			});
 		}
-		// 🔥 Mostrar el modal
-		new bootstrap.Modal(document.getElementById("modalDetalleGenerico")).show();
 
 	} catch (err) {
 		console.error("Error cargando detalle del evento:", err);

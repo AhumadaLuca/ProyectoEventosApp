@@ -33,6 +33,9 @@
 		<a href="#" data-bs-toggle="modal" data-bs-target="#filtrosModal">
 			🧭 Filtros
 		</a>
+			<button id="btnQuitarFiltros" class="btn btn-outline-danger d-none quitar-filtros-btn">
+				Quitar filtros
+			</button>
 	</div>
 
 
@@ -311,36 +314,55 @@
 					<h5 class="modal-title">Filtros</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 				</div>
+
 				<div class="modal-body">
 					<form id="formFiltros">
+
+						<!-- Categorías -->
 						<div class="mb-3">
-							<label class="form-label">Categorías</label><br />
+							<label class="form-label">Categorías</label><br>
 							<div class="form-check">
-								<input type="checkbox" id="catMusica" class="form-check-input" />
+								<input type="checkbox" class="form-check-input filtro-categoria" value="Música"
+									id="catMusica">
 								<label for="catMusica" class="form-check-label">Música</label>
 							</div>
+
 							<div class="form-check">
-								<input type="checkbox" id="catDeporte" class="form-check-input" />
+								<input type="checkbox" class="form-check-input filtro-categoria" value="Deporte"
+									id="catDeporte">
 								<label for="catDeporte" class="form-check-label">Deporte</label>
 							</div>
+
 							<div class="form-check">
-								<input type="checkbox" id="catTeatro" class="form-check-input" />
+								<input type="checkbox" class="form-check-input filtro-categoria" value="Teatro"
+									id="catTeatro">
 								<label for="catTeatro" class="form-check-label">Teatro</label>
 							</div>
 						</div>
+
+						<!-- Precio -->
 						<div class="mb-3">
 							<label class="form-label">Precio máximo</label>
-							<input type="number" class="form-control" placeholder="Ej: 1000" />
+							<input type="number" id="filtroPrecio" class="form-control" placeholder="Ej: 1000">
 						</div>
+
+						<!-- Fechas -->
+						<div class="mb-3">
+							<label class="form-label">Fecha desde</label>
+							<input type="date" id="filtroFechaDesde" class="form-control">
+						</div>
+
+						<div class="mb-3">
+							<label class="form-label">Fecha hasta</label>
+							<input type="date" id="filtroFechaHasta" class="form-control">
+						</div>
+
 					</form>
 				</div>
+
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-						Cerrar
-					</button>
-					<button type="submit" class="btn btn-primary">
-						Aplicar filtros
-					</button>
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+					<button id="btnAplicarFiltros" type="button" class="btn btn-primary">Aplicar filtros</button>
 				</div>
 			</div>
 		</div>
@@ -363,9 +385,9 @@
 			</div>
 		</div>
 	</div>
-	
-	
-	
+
+
+
 	<!-- MODAL ADMINISTRAR EVENTOS DE UN ORGANIZADOR -->
 	<div class="modal fade" id="modalAdministrarEventosOrganizador" tabindex="-1"
 		aria-labelledby="detalleEventoModalLabel" aria-hidden="true">

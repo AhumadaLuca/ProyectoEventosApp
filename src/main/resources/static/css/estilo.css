@@ -57,6 +57,13 @@ html, body {
   margin-bottom: 1rem;
 }
 
+.quitar-filtros-btn {
+	display: flex !important;
+	justify-content: center;
+    margin: 10px auto; /* centra horizontalmente */
+    width: 50%;        /* opcional: para que no quede enorme */
+}
+
 /* --- Contenido principal (mapa) --- */
 #map {
   position: absolute;

@@ -8,6 +8,7 @@ import { initAdminPanel } from './adminPanel.js';
 import { decodeJwt } from './issuerDecode.js';
 import { initPasswordToggles } from './passwordToggle.js';
 import { initVerOrganizador } from './organizador.js';
+import "./filtros.js";
 
 export async function iniciarApp() {
 	

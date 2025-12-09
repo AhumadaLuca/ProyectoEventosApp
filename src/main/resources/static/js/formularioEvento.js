@@ -121,6 +121,9 @@ export function initFormularioEvento() {
 				}
 				const ok = await validarDimensionesImagen(imagenUrl);
 				if (!ok) { showFieldError("eventoImagen", "La imagen debe ser mínimo 150x150 pixeles"); hasError = true; }
+			}else{
+				showFieldError("eventoImagen", "Debe ingresar una imagen obligatoriamente del evento");
+				hasError = true;
 			}
 
 			if (hasError) {
